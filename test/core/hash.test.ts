@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { dct1d, dct2d } from '../../src/core/hash/dct';
+import { dct1d, dct2d, idct1d, idct2d } from '../../src/core/hash/dct';
 import { hamming, normalizedHamming } from '../../src/core/hash/hamming';
 import { aHash } from '../../src/core/hash/ahash';
 import { dHash } from '../../src/core/hash/dhash';
@@ -19,6 +19,22 @@ describe('dct1d', () => {
     const e1 = x.reduce((a, b) => a + b * b, 0);
     const e2 = X.reduce((a, b) => a + b * b, 0);
     expect(e2).toBeCloseTo(e1, 6);
+  });
+});
+
+describe('idct', () => {
+  it('idct1d inverts dct1d', () => {
+    const x = Float64Array.from([3, 1, 4, 1, 5, 9, 2, 6]);
+    const back = idct1d(dct1d(x));
+    for (let i = 0; i < x.length; i++) expect(back[i]).toBeCloseTo(x[i]!, 6);
+  });
+
+  it('idct2d inverts dct2d', () => {
+    const size = 8;
+    const plane = new Float64Array(size * size);
+    for (let i = 0; i < plane.length; i++) plane[i] = (i * 31) % 97;
+    const back = idct2d(dct2d(plane, size), size);
+    for (let i = 0; i < plane.length; i++) expect(back[i]).toBeCloseTo(plane[i]!, 5);
   });
 });
 

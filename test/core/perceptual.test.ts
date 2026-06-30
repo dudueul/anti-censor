@@ -2,9 +2,11 @@ import { describe, it, expect } from 'vitest';
 import {
   maximizeAverageHash,
   maximizePerceptualHash,
+  maximizeDifferenceHash,
   addLowFrequencyField,
 } from '../../src/core/transforms/perceptual';
 import { aHash } from '../../src/core/hash/ahash';
+import { dHash } from '../../src/core/hash/dhash';
 import { pHash } from '../../src/core/hash/phash';
 import { hamming } from '../../src/core/hash/hamming';
 import { ssim } from '../../src/core/metrics/ssim';
@@ -67,6 +69,26 @@ describe('maximizePerceptualHash', () => {
     const copy = Array.from(img.data);
     const a = maximizePerceptualHash(img, { amplitude: 22 });
     const b = maximizePerceptualHash(img, { amplitude: 22 });
+    expect(Array.from(a.data)).toEqual(Array.from(b.data));
+    expect(Array.from(img.data)).toEqual(copy);
+  });
+});
+
+describe('maximizeDifferenceHash', () => {
+  it('moves dHash past a match threshold while staying faithful', () => {
+    for (const seed of [21, 5, 99]) {
+      const img = photoLike(128, 128, seed);
+      const out = maximizeDifferenceHash(img, { amplitude: 20, margin: 3 });
+      expect(hamming(dHash(img), dHash(out))).toBeGreaterThan(12);
+      expect(ssim(img, out)).toBeGreaterThan(0.88);
+    }
+  });
+
+  it('is deterministic and does not mutate the input', () => {
+    const img = photoLike(96, 96, 7);
+    const copy = Array.from(img.data);
+    const a = maximizeDifferenceHash(img, { amplitude: 20 });
+    const b = maximizeDifferenceHash(img, { amplitude: 20 });
     expect(Array.from(a.data)).toEqual(Array.from(b.data));
     expect(Array.from(img.data)).toEqual(copy);
   });

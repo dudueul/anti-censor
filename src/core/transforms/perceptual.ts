@@ -125,6 +125,63 @@ export function maximizePerceptualHash(
 }
 
 /**
+ * Targeted difference-hash (dHash) maximizer.
+ *
+ * dHash emits, on a (hashSide+1)x hashSide grid, one bit per adjacent horizontal
+ * pair (left < right). Each cell is shared by two pairs, so bits cannot be
+ * flipped independently; we sweep each row left-to-right, adjusting only the
+ * *right* cell of the current pair to invert its gradient sign (by `margin`),
+ * carrying the adjusted value forward as the next pair's left. Adjustments are
+ * clamped to `amplitude`, so pairs we cannot flip within budget are left as-is.
+ * The resulting nudge grid is upscaled block-constant and added as luma.
+ */
+export interface MaximizeDHashOptions {
+  amplitude?: number;
+  margin?: number;
+  hashSide?: number;
+}
+
+export function maximizeDifferenceHash(
+  img: Raster,
+  opts: MaximizeDHashOptions = {},
+): Raster {
+  const { amplitude = 20, margin = 3, hashSide = 8 } = opts;
+  const gw = hashSide + 1;
+  const luma = rgbaToLuma(img);
+  const small = resizeArea(luma, img.width, img.height, gw, hashSide);
+  const bias = new Float64Array(gw * hashSide);
+
+  for (let y = 0; y < hashSide; y++) {
+    const row = y * gw;
+    // running adjusted value of the current left cell
+    let left = small[row]!;
+    for (let x = 0; x < hashSide; x++) {
+      const rightOrig = small[row + x + 1]!;
+      let right = rightOrig + bias[row + x + 1]!;
+      const wasLeftLess = left < right;
+      // desired: invert the sign
+      let target: number;
+      if (wasLeftLess) target = left - margin; // make right < left
+      else target = left + margin; // make right > left
+      let d = target - rightOrig;
+      if (d > amplitude) d = amplitude;
+      if (d < -amplitude) d = -amplitude;
+      // only commit if it actually flips the sign within budget
+      const newRight = rightOrig + d;
+      const flips = wasLeftLess ? newRight < left : newRight > left;
+      if (flips) {
+        bias[row + x + 1] = d;
+        right = newRight;
+      }
+      left = right;
+    }
+  }
+
+  const biasFull = resizeArea(bias, gw, hashSide, img.width, img.height);
+  return addLumaPlane(img, biasFull);
+}
+
+/**
  * Broad low-frequency disruptor.
  *
  * A random, zero-mean signed field at `grid`x`grid` resolution, upscaled

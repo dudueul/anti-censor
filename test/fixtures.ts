@@ -83,8 +83,9 @@ export function photoLike(w: number, h: number, seed = 1): Raster {
         g -= 70;
         b -= 50;
       }
-      // mild grain
-      const n = (rng() - 0.5) * 10;
+      // mild grain (photo-realistic; large grain would make SSIM understate
+      // fidelity since JPEG/resampling legitimately removes it)
+      const n = (rng() - 0.5) * 4;
       const o = (y * w + x) * 4;
       img.data[o] = r + n;
       img.data[o + 1] = g + n;

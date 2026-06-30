@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>anti-censor</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        font: 13px/1.4 system-ui, sans-serif;
+        width: 300px;
+        margin: 0;
+        padding: 14px 16px;
+      }
+      h1 { font-size: 15px; margin: 0 0 2px; }
+      .sub { color: #888; margin: 0 0 12px; font-size: 11px; }
+      .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 10px 0; }
+      .row label { flex: 1; }
+      input[type='range'] { width: 130px; }
+      select { flex: 0 0 auto; }
+      .val { width: 34px; text-align: right; color: #666; font-variant-numeric: tabular-nums; }
+      .note {
+        margin-top: 12px; padding: 8px 10px; border-radius: 6px;
+        background: rgba(127,127,127,0.12); font-size: 11px; color: #777;
+      }
+      hr { border: none; border-top: 1px solid rgba(127,127,127,0.25); margin: 12px 0; }
+    </style>
+  </head>
+  <body>
+    <h1>anti-censor</h1>
+    <p class="sub">Make an image read as new, unidentified media.</p>
+
+    <div class="row">
+      <label for="autoIntercept">Auto-intercept uploads</label>
+      <input type="checkbox" id="autoIntercept" />
+    </div>
+
+    <div class="row">
+      <label for="strength">Strength</label>
+      <input type="range" id="strength" min="0" max="1" step="0.05" />
+      <span class="val" id="strengthVal"></span>
+    </div>
+
+    <div class="row">
+      <label for="flipAllowed">Allow horizontal flip</label>
+      <input type="checkbox" id="flipAllowed" />
+    </div>
+
+    <div class="row">
+      <label for="stripMetadata">Strip metadata / C2PA</label>
+      <input type="checkbox" id="stripMetadata" />
+    </div>
+
+    <hr />
+
+    <div class="row">
+      <label for="outputType">Output format</label>
+      <select id="outputType">
+        <option value="image/jpeg">JPEG</option>
+        <option value="image/png">PNG</option>
+        <option value="image/webp">WebP</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="outputQuality">Output quality</label>
+      <input type="range" id="outputQuality" min="0.5" max="1" step="0.02" />
+      <span class="val" id="outputQualityVal"></span>
+    </div>
+
+    <p class="note">
+      Right-click any image → “Obfuscate image (anti-censor)”. Reliably defeats
+      perceptual-hash blocklists, metadata/C2PA and classical watermarks. It does
+      <b>not</b> defeat SynthID, Tree-Ring or robust learned detectors — and is
+      only for circumventing censorship of lawful content.
+    </p>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

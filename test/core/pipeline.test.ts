@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { transformImage } from '../../src/core/pipeline';
 import { pHash } from '../../src/core/hash/phash';
+import { wHash } from '../../src/core/hash/whash';
+import { blockHash } from '../../src/core/hash/blockhash';
+import { pdqHash } from '../../src/core/hash/pdq';
 import { hamming } from '../../src/core/hash/hamming';
 import { ssim } from '../../src/core/metrics/ssim';
 import { photoLike } from '../fixtures';
@@ -19,6 +22,11 @@ describe('transformImage pipeline', () => {
       // the reported metrics match an independent recomputation
       expect(hamming(pHash(img), pHash(r.image))).toBe(r.metrics.pHashDistance);
       expect(ssim(img, r.image)).toBeCloseTo(r.metrics.ssim, 6);
+      // ...and it also defeats the rest of the deployed hash family (wHash,
+      // blockhash, PDQ) past their match thresholds (~7/64, ~26/256, 31/256).
+      expect(hamming(wHash(img), wHash(r.image))).toBeGreaterThanOrEqual(8);
+      expect(hamming(blockHash(img), blockHash(r.image))).toBeGreaterThanOrEqual(20);
+      expect(hamming(pdqHash(img), pdqHash(r.image))).toBeGreaterThan(31);
     }
   });
 

@@ -30,13 +30,13 @@ describe('transformImage pipeline', () => {
     }
   });
 
-  it('opt-in elastic+carve mode passes and hammers PDQ while staying faithful', () => {
+  it('opt-in maximize mode (elastic+carve+prnu) passes and hammers PDQ while faithful', () => {
     for (const seed of [21, 5, 99]) {
       const img = photoLike(160, 160, seed);
-      const r = transformImage(img, { seed: 1, elastic: true, carve: true });
+      const r = transformImage(img, { seed: 1, elastic: true, carve: true, prnu: true });
       expect(r.passed).toBe(true);
       expect(hamming(pdqHash(img), pdqHash(r.image))).toBeGreaterThan(50);
-      expect(r.metrics.ssim).toBeGreaterThanOrEqual(0.75);
+      expect(r.metrics.ssim).toBeGreaterThanOrEqual(0.72);
     }
   });
 

@@ -9,6 +9,7 @@ import { psnr } from './metrics/psnr';
 import { geometricJitter } from './transforms/geometry';
 import { elasticWarp } from './transforms/warp';
 import { seamCarve } from './transforms/seam';
+import { suppressPrnu } from './transforms/prnu';
 import { dctBandJitter } from './transforms/frequency';
 import { addLowFrequencyField } from './transforms/perceptual';
 import { addGaussianNoise } from './transforms/noise';
@@ -39,6 +40,8 @@ export interface PipelineOptions {
   elastic?: boolean;
   /** Content-aware seam carving before the affine pass (strong vs PDQ/PhotoDNA). Opt-in. */
   carve?: boolean;
+  /** Suppress the camera PRNU sensor fingerprint. Opt-in. */
+  prnu?: boolean;
   /** Per-hash Hamming distance the result must beat. */
   targetHashDistance?: number;
   /** Minimum acceptable SSIM vs the original. */
@@ -70,6 +73,7 @@ function clamp01(v: number): number {
 interface RunExtras {
   elastic?: boolean;
   carve?: boolean;
+  prnu?: boolean;
 }
 
 function runOnce(
@@ -87,7 +91,11 @@ function runOnce(
   const cropBase = 0.005 + 0.012 * s;
 
   let src = img;
-  // 0. (opt-in) content-aware seam carving — strong, dihedral-resistant desync
+  // 0a. (opt-in) suppress the camera PRNU sensor fingerprint (denoise residual).
+  if (extras.prnu) {
+    src = suppressPrnu(src, { strength: 0.3 + 0.3 * s });
+  }
+  // 0b. (opt-in) content-aware seam carving — strong, dihedral-resistant desync
   // of PDQ/PhotoDNA-class hashes; applied first so later stages see the retarget.
   if (extras.carve) {
     src = seamCarve(src, { seams: Math.round(3 + 6 * s), both: true });
@@ -154,6 +162,7 @@ export function transformImage(img: Raster, opts: PipelineOptions = {}): Pipelin
     flipAllowed = false,
     elastic = false,
     carve = false,
+    prnu = false,
     targetHashDistance = 12,
     minSsim = 0.75,
     maxIterations = 3,
@@ -165,7 +174,7 @@ export function transformImage(img: Raster, opts: PipelineOptions = {}): Pipelin
   let iterations = 0;
   for (let i = 0; i < Math.max(1, maxIterations); i++) {
     iterations++;
-    const image = runOnce(img, s, (seed + i * 0x1000193) >>> 0, flipAllowed, { elastic, carve });
+    const image = runOnce(img, s, (seed + i * 0x1000193) >>> 0, flipAllowed, { elastic, carve, prnu });
     const metrics = measure(img, image);
     const hashesOk =
       metrics.aHashDistance >= targetHashDistance &&

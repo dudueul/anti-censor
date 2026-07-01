@@ -16,10 +16,20 @@ export {
 } from './transforms/watermark';
 export type { SchemeVerdict, SchemeStatus } from './transforms/watermark';
 
+// Individual transforms (for callers composing their own pipeline).
+export { elasticWarp } from './transforms/warp';
+export { seamCarve } from './transforms/seam';
+export { suppressPrnu } from './transforms/prnu';
+export { adversarialTexture } from './transforms/adversarial';
+export { injectDecoyWatermark, detectDecoy } from './transforms/decoy';
+
 // Hashes & metrics (useful for callers that want to verify a result themselves).
 export { aHash } from './hash/ahash';
 export { dHash } from './hash/dhash';
 export { pHash } from './hash/phash';
+export { wHash } from './hash/whash';
+export { blockHash } from './hash/blockhash';
+export { pdqHash } from './hash/pdq';
 export { hamming, normalizedHamming } from './hash/hamming';
 export { ssim } from './metrics/ssim';
 export { psnr, mse } from './metrics/psnr';

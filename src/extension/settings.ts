@@ -8,6 +8,8 @@ export interface Settings {
   strength: number;
   /** Allow a horizontal flip (changes orientation; off for text/known-orientation). */
   flipAllowed: boolean;
+  /** Maximum evasion: seam carving + elastic warp + PRNU suppression (slower). */
+  maximize: boolean;
   /** Strip EXIF/XMP/C2PA metadata before processing. */
   stripMetadata: boolean;
   /** Output format for the re-encoded image. */
@@ -20,6 +22,7 @@ export const DEFAULT_SETTINGS: Settings = {
   autoIntercept: false,
   strength: 0.4,
   flipAllowed: false,
+  maximize: false,
   stripMetadata: true,
   outputType: 'image/jpeg',
   outputQuality: 0.92,
@@ -43,5 +46,11 @@ export async function saveSettings(s: Partial<Settings>): Promise<void> {
 
 /** Map persisted settings to the pure pipeline options. */
 export function settingsToPipelineOptions(s: Settings): PipelineOptions {
-  return { strength: s.strength, flipAllowed: s.flipAllowed };
+  return {
+    strength: s.strength,
+    flipAllowed: s.flipAllowed,
+    elastic: s.maximize,
+    carve: s.maximize,
+    prnu: s.maximize,
+  };
 }

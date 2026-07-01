@@ -13,6 +13,7 @@ async function init(): Promise<void> {
   const strength = $<HTMLInputElement>('strength');
   const strengthVal = $<HTMLSpanElement>('strengthVal');
   const flipAllowed = $<HTMLInputElement>('flipAllowed');
+  const maximize = $<HTMLInputElement>('maximize');
   const stripMetadata = $<HTMLInputElement>('stripMetadata');
   const outputType = $<HTMLSelectElement>('outputType');
   const outputQuality = $<HTMLInputElement>('outputQuality');
@@ -22,6 +23,7 @@ async function init(): Promise<void> {
   strength.value = String(s.strength);
   strengthVal.textContent = s.strength.toFixed(2);
   flipAllowed.checked = s.flipAllowed;
+  maximize.checked = s.maximize;
   stripMetadata.checked = s.stripMetadata;
   outputType.value = s.outputType;
   outputQuality.value = String(s.outputQuality);
@@ -40,6 +42,7 @@ async function init(): Promise<void> {
   flipAllowed.addEventListener('change', () =>
     persist({ flipAllowed: flipAllowed.checked }),
   );
+  maximize.addEventListener('change', () => persist({ maximize: maximize.checked }));
   stripMetadata.addEventListener('change', () =>
     persist({ stripMetadata: stripMetadata.checked }),
   );

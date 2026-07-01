@@ -23,6 +23,12 @@ export { suppressPrnu } from './transforms/prnu';
 export { adversarialTexture } from './transforms/adversarial';
 export { injectDecoyWatermark, detectDecoy } from './transforms/decoy';
 
+// Video / audio cores (pure; the WebCodecs/WebAudio decode-encode is an adapter).
+export { temporalPlan } from './video/temporal';
+export type { TemporalOptions, PlannedFrame, TemporalPlanResult } from './video/temporal';
+export { processFrame } from './video/frame';
+export { resampleLinear, timeStretch, pitchShift, addAudioNoise } from './audio/dsp';
+
 // Hashes & metrics (useful for callers that want to verify a result themselves).
 export { aHash } from './hash/ahash';
 export { dHash } from './hash/dhash';

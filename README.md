@@ -2,10 +2,12 @@
 
 A Chromium (Manifest V3) extension that applies imperceptible transformations to
 images before they leave your browser, so that automated content-identification
-systems — **perceptual-hash blocklists**, **file/metadata signatures**,
-**C2PA provenance**, **classical invisible watermarks**, and near-duplicate
-reverse-image matching — no longer recognise the media as a previously-seen
-item, while it stays visually faithful to a human viewer.
+systems — **perceptual-hash blocklists** (aHash/dHash/pHash/wHash/blockhash and
+the PDQ/PhotoDNA family), **file/metadata signatures** (JPEG/PNG/WebP EXIF/XMP),
+**C2PA provenance**, **classical invisible watermarks**, **camera PRNU
+fingerprints**, and near-duplicate reverse-image matching — no longer recognise
+the media as a previously-seen item, while it stays visually faithful to a human
+viewer.
 
 ## Why
 
@@ -41,8 +43,14 @@ unit-tested in Node, with no DOM/canvas/network):
    clear the match threshold and SSIM stays high.
 
 On the test fixtures this moves aHash, dHash and pHash all **>12/64 bits** (well
-past the ~10-bit match thresholds) while keeping **SSIM ≥ 0.75** (higher on real
-photos); strength is a fidelity/efficacy dial.
+past the ~10-bit match thresholds), and also clears wHash/blockhash/**PDQ**
+(PDQ moves 48–72/256 vs a 31/256 cutoff), while keeping **SSIM ≥ 0.75** (higher
+on real photos); strength is a fidelity/efficacy dial.
+
+**Maximize evasion** (opt-in toggle) adds dihedral-resistant geometry that a
+defender cannot normalise away — **seam carving** (content-aware retarget, hammers
+PDQ/PhotoDNA-class hashes to 78–84/256), an **elastic warp**, and **PRNU
+suppression** — plus opt-in adversarial-texture and decoy-watermark stages.
 
 ## Build & install
 
@@ -62,15 +70,18 @@ select the `dist/` folder.**
 - **Auto-intercept** (toggle in the popup) transparently transforms images you
   upload through standard `<input type=file>` fields before the page reads them.
   This is best-effort — see the limitations.
-- The popup exposes **strength**, **allow-flip**, **strip-metadata** and the
-  **output format/quality**.
+- The popup exposes **strength**, **allow-flip**, **Maximize evasion** (seam
+  carve + elastic warp + PRNU), **strip-metadata** and the **output
+  format/quality**.
 
 ## Limitations & ethics
 
 Honesty is a design goal — see [`docs/DESIGN.md`](docs/DESIGN.md) §Limitations.
 
-- **Reliably defeated**: classical/grid perceptual hashes, exact-file/byte
-  hashes, EXIF/XMP/C2PA metadata, LSB & classical DCT/DWT/QIM watermarks.
+- **Reliably defeated**: the classical/grid perceptual-hash family (aHash/dHash/
+  pHash/wHash/blockhash + PDQ/PhotoDNA-class), exact-file/byte hashes, EXIF/XMP/
+  C2PA metadata (JPEG/PNG/WebP), LSB & classical DCT/DWT/QIM watermarks, and
+  (opt-in) camera PRNU sensor fingerprints.
 - **Partial / unreliable**: learned "DNA" feature filters & NeuralHash (move only
   under strong geometry; re-trainable), black-box AI classifiers and face/reverse
   search (transfer attacks give a false sense of security).

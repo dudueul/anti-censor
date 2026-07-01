@@ -67,17 +67,26 @@ audio via pure pitch/tempo DSP cores.
 
 | Module | Priority | Status |
 |---|---|---|
-| metadata-strip (JPEG/PNG/C2PA) | P0 | ✅ implemented + tested |
-| perceptual-hash-maximizer (aHash, pHash, dHash) | P0 | ✅ aHash/pHash; dHash added |
+| metadata-strip (JPEG/PNG/**WebP**/C2PA) | P0 | ✅ implemented + tested |
+| perceptual-hash-maximizer (aHash, pHash, dHash) | P0 | ✅ implemented + tested |
+| hash oracles for the full family (wHash, blockhash, **PDQ-256**) | P0 | ✅ implemented + tested |
 | geometric-jitter (rotate/crop/anamorphic/flip) | P0 | ✅ implemented + tested |
+| **seam carving** (content-aware retarget) | P1 | ✅ implemented + tested (opt-in) |
+| **elastic warp** (smooth local displacement) | P1 | ✅ implemented + tested (opt-in) |
 | pixel-perturbation (noise, tone, low-freq field) | P1 | ✅ implemented + tested |
 | recompress-quantization-jitter (simulator) | P0 | ✅ implemented + tested |
 | frequency-domain-perturbation (dctBandJitter) | P1 | ✅ implemented + tested |
 | watermark-disruptor (orchestrator + honest report) | P1 | ✅ implemented + tested |
+| **PRNU suppression** (sensor fingerprint) | P2 | ✅ implemented + tested (opt-in) |
 | pipeline controller + verification gate | P0 | ✅ implemented + tested |
 | browser adapters + MV3 extension + build | P0 | ✅ implemented |
-| adversarial-texture / decoy-watermark | P3 | documented; opt-in stubs |
+| adversarial-texture / decoy-watermark | P3 | ✅ implemented + tested (opt-in, honestly weak) |
 | video/audio cores | P2 | designed; deferred (see Limitations) |
+
+Opt-in stages (seam carve, elastic warp, PRNU) are exposed via the pipeline
+`carve` / `elastic` / `prnu` options and the extension's **"Maximize evasion"**
+toggle; they are off by default so the tuned default path stays fast and
+high-fidelity.
 
 ## Test strategy
 

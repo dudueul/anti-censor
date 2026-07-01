@@ -7,6 +7,8 @@ import { hamming } from './hash/hamming';
 import { ssim } from './metrics/ssim';
 import { psnr } from './metrics/psnr';
 import { geometricJitter } from './transforms/geometry';
+import { elasticWarp } from './transforms/warp';
+import { seamCarve } from './transforms/seam';
 import { dctBandJitter } from './transforms/frequency';
 import { addLowFrequencyField } from './transforms/perceptual';
 import { addGaussianNoise } from './transforms/noise';
@@ -33,6 +35,10 @@ export interface PipelineOptions {
   seed?: number;
   /** Allow a horizontal flip (changes orientation; gate off for text). */
   flipAllowed?: boolean;
+  /** Add a smooth elastic warp (extra, dihedral-resistant geometry). Opt-in. */
+  elastic?: boolean;
+  /** Content-aware seam carving before the affine pass (strong vs PDQ/PhotoDNA). Opt-in. */
+  carve?: boolean;
   /** Per-hash Hamming distance the result must beat. */
   targetHashDistance?: number;
   /** Minimum acceptable SSIM vs the original. */
@@ -61,11 +67,17 @@ function clamp01(v: number): number {
   return v < 0 ? 0 : v > 1 ? 1 : v;
 }
 
+interface RunExtras {
+  elastic?: boolean;
+  carve?: boolean;
+}
+
 function runOnce(
   img: Raster,
   strength: number,
   seed: number,
   flipAllowed: boolean,
+  extras: RunExtras = {},
 ): Raster {
   const s = clamp01(strength);
   const rng = mulberry32(seed);
@@ -74,8 +86,15 @@ function runOnce(
   // low-cost surgical maximizers (not geometry) dominate and SSIM stays high.
   const cropBase = 0.005 + 0.012 * s;
 
+  let src = img;
+  // 0. (opt-in) content-aware seam carving — strong, dihedral-resistant desync
+  // of PDQ/PhotoDNA-class hashes; applied first so later stages see the retarget.
+  if (extras.carve) {
+    src = seamCarve(src, { seams: Math.round(3 + 6 * s), both: true });
+  }
+
   // 1. gentle geometry (desync grid hashes, esp. dHash)
-  let out = geometricJitter(img, {
+  let out = geometricJitter(src, {
     rotateDeg: (0.3 + 0.9 * s) * (rng() < 0.5 ? -1 : 1),
     cropLeft: cropBase * rng(),
     cropRight: cropBase * rng(),
@@ -85,6 +104,11 @@ function runOnce(
     scaleY: 1 + 0.005 * s,
     flip: flipAllowed,
   });
+
+  // 1b. (opt-in) elastic warp — local displacement no fixed transform can invert
+  if (extras.elastic) {
+    out = elasticWarp(out, { amplitude: 1 + 1.5 * s, grid: 10, seed: sub(0x2545f491) });
+  }
 
   // 2. frequency-domain carrier-band disruption
   out = dctBandJitter(out, {
@@ -128,6 +152,8 @@ export function transformImage(img: Raster, opts: PipelineOptions = {}): Pipelin
     strength = 0.4,
     seed = 1,
     flipAllowed = false,
+    elastic = false,
+    carve = false,
     targetHashDistance = 12,
     minSsim = 0.75,
     maxIterations = 3,
@@ -139,7 +165,7 @@ export function transformImage(img: Raster, opts: PipelineOptions = {}): Pipelin
   let iterations = 0;
   for (let i = 0; i < Math.max(1, maxIterations); i++) {
     iterations++;
-    const image = runOnce(img, s, (seed + i * 0x1000193) >>> 0, flipAllowed);
+    const image = runOnce(img, s, (seed + i * 0x1000193) >>> 0, flipAllowed, { elastic, carve });
     const metrics = measure(img, image);
     const hashesOk =
       metrics.aHashDistance >= targetHashDistance &&

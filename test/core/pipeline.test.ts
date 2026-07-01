@@ -30,6 +30,16 @@ describe('transformImage pipeline', () => {
     }
   });
 
+  it('opt-in elastic+carve mode passes and hammers PDQ while staying faithful', () => {
+    for (const seed of [21, 5, 99]) {
+      const img = photoLike(160, 160, seed);
+      const r = transformImage(img, { seed: 1, elastic: true, carve: true });
+      expect(r.passed).toBe(true);
+      expect(hamming(pdqHash(img), pdqHash(r.image))).toBeGreaterThan(50);
+      expect(r.metrics.ssim).toBeGreaterThanOrEqual(0.75);
+    }
+  });
+
   it('keeps output dimensions', () => {
     const img = photoLike(128, 96, 3);
     const r = transformImage(img, { seed: 2 });

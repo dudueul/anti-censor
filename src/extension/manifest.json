@@ -3,7 +3,7 @@
   "name": "anti-censor",
   "version": "0.1.0",
   "description": "Apply imperceptible transforms to images so automated content-identification (perceptual hashes, watermarks, C2PA) treats them as new, unidentified media.",
-  "permissions": ["contextMenus", "downloads", "storage"],
+  "permissions": ["contextMenus", "downloads", "storage", "offscreen"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js",

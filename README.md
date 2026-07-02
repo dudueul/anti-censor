@@ -71,6 +71,10 @@ select the `dist/` folder.**
 
 - **Right-click any image → “Obfuscate image (anti-censor)”** → the transformed
   image is downloaded. (Robust path.)
+- **Right-click any video → “Obfuscate video (anti-censor)”** → per-frame
+  transform + temporal restructuring, re-encoded to WebM (VP8). Runs in an
+  offscreen document (WebCodecs); best-effort and suited to short clips. Audio is
+  dropped in this version.
 - **Auto-intercept** (toggle in the popup) transparently transforms images you
   upload through standard `<input type=file>` fields before the page reads them.
   This is best-effort — see the limitations.

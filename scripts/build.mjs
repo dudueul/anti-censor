@@ -24,11 +24,13 @@ const builds = [
   { entryPoints: [resolve(ext, 'background.ts')], outfile: resolve(out, 'background.js'), format: 'esm' },
   { entryPoints: [resolve(ext, 'content.ts')], outfile: resolve(out, 'content.js'), format: 'iife' },
   { entryPoints: [resolve(ext, 'popup.ts')], outfile: resolve(out, 'popup.js'), format: 'iife' },
+  { entryPoints: [resolve(ext, 'offscreen.ts')], outfile: resolve(out, 'offscreen.js'), format: 'iife' },
 ];
 
 function copyStatic() {
   copyFileSync(resolve(ext, 'manifest.json'), resolve(out, 'manifest.json'));
   copyFileSync(resolve(ext, 'popup.html'), resolve(out, 'popup.html'));
+  copyFileSync(resolve(ext, 'offscreen.html'), resolve(out, 'offscreen.html'));
 }
 
 function makeIcon(size) {

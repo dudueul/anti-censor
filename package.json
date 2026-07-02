@@ -21,6 +21,7 @@
     "playwright": "^1.61.1",
     "pngjs": "^7.0.0",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "webm-muxer": "^5.1.4"
   }
 }

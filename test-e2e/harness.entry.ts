@@ -2,6 +2,7 @@
 // the integration tests can drive the browser-only adapter (OffscreenCanvas /
 // createImageBitmap / ImageData / convertToBlob) together with the pure core.
 export { processBlob, blobToRaster, rasterToBlob, outputName } from '../src/adapters/canvas';
+export { processVideo, extractFrames, encodeFramesToWebm } from '../src/adapters/video';
 export { transformImage } from '../src/core/pipeline';
 export { stripMetadata } from '../src/core/codec';
 export { pHash } from '../src/core/hash/phash';

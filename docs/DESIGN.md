@@ -81,8 +81,9 @@ audio via pure pitch/tempo DSP cores.
 | pipeline controller + verification gate | P0 | ✅ implemented + tested |
 | browser adapters + MV3 extension + build | P0 | ✅ implemented |
 | adversarial-texture / decoy-watermark | P3 | ✅ implemented + tested (opt-in, honestly weak) |
-| video temporal plan + per-frame processor | P2 | ✅ pure cores implemented + tested (WebCodecs encode = adapter) |
-| audio DSP cores (pitch/tempo/noise) | P2 | ✅ implemented + tested (WebAudio decode = adapter) |
+| video temporal plan + per-frame processor | P2 | ✅ pure cores implemented + tested |
+| video adapter (WebCodecs decode/encode + WebM mux) | P2 | ✅ implemented + E2E-tested; wired via an offscreen document |
+| audio DSP cores (pitch/tempo/noise) | P2 | ✅ implemented + tested (muxing an audio track = future work) |
 
 Opt-in stages (seam carve, elastic warp, PRNU) are exposed via the pipeline
 `carve` / `elastic` / `prnu` options and the extension's **"Maximize evasion"**

@@ -20,6 +20,8 @@ jobs:
         run: npm run typecheck
       - name: Unit tests
         run: npm test
+      - name: Red-team (independent detectors)
+        run: npm run test:redteam
       - name: Build extension
         run: npm run build
 

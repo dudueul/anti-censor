@@ -116,6 +116,25 @@ high-fidelity.
   out of the fast unit suite. Still manual-only: full unpacked-extension load,
   WebCodecs/WebAudio decode-encode, surrogate-model inference.
 
+## Red-team validation (independent detectors)
+
+`npm run test:redteam` validates the transforms against detector code we did **not**
+write: pixels are decoded by jimp and hashed by `blockhash-core`. Two lessons are
+baked into the harness:
+
+- **Oracles must be validated, not trusted.** jimp's own `.hash()` turned out to
+  be near-constant across totally different images (solid black vs white differ by
+  ~1/64), so its small movement under our transform is meaningless — it is
+  excluded as a detector and kept only as an independent decoder. `blockhash-core`
+  *is* discriminative (distinct photos ~24–56/256 apart) and is used as the oracle.
+- **Independent result:** on photographic inputs the default pipeline moves the
+  `blockhash-core` hash 22–54/256 — i.e. a transformed image lands about as far
+  from its original as a *completely different photo* — at SSIM ≥ 0.81, defeating
+  it on 100% of the corpus (match threshold ~10/256). Maximize mode pushes it
+  further. Our *targeted* pHash maximizer, by contrast, is tuned to our own DCT
+  and does not transfer to arbitrary third-party pHash implementations — geometry
+  and recompression are what generalize.
+
 ## Limitations & ethics
 
 **Honesty is a feature.** The UI and docs must not over-claim.

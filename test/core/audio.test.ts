@@ -4,6 +4,8 @@ import {
   timeStretch,
   pitchShift,
   addAudioNoise,
+  convertSampleRate,
+  obfuscateAudio,
 } from '../../src/core/audio/dsp';
 
 const SR = 8000;
@@ -63,6 +65,43 @@ describe('pitchShift', () => {
     const f = estFreq(out);
     expect(f).toBeGreaterThan(300 * 1.1);
     expect(f).toBeLessThan(300 * 1.32);
+  });
+});
+
+describe('convertSampleRate', () => {
+  it('changes sample count to the target rate while preserving pitch/duration', () => {
+    const x = sine(300, 0.5, 8000);
+    const up = convertSampleRate(x, 8000, 16000);
+    expect(up.length).toBe(Math.round(x.length * 16000 / 8000));
+    // duration preserved => same real frequency at the new rate
+    expect(estFreq(up, 16000)).toBeCloseTo(300, -1.05);
+  });
+
+  it('is identity when rates match', () => {
+    const x = sine(220, 0.2, 8000);
+    const out = convertSampleRate(x, 8000, 8000);
+    expect(Array.from(out)).toEqual(Array.from(x));
+  });
+});
+
+describe('obfuscateAudio', () => {
+  it('returns 48k channels, shifts pitch, is deterministic', () => {
+    const ch = sine(300, 0.4, 16000);
+    const a = obfuscateAudio([ch], 16000, { pitch: 1.08, noise: 0.003, seed: 1 });
+    const b = obfuscateAudio([ch], 16000, { pitch: 1.08, noise: 0.003, seed: 1 });
+    expect(a.sampleRate).toBe(48000);
+    expect(a.channels.length).toBe(1);
+    expect(Array.from(a.channels[0]!)).toEqual(Array.from(b.channels[0]!));
+    // pitch raised: fundamental at the new rate exceeds the original 300 Hz
+    expect(estFreq(a.channels[0]!, 48000)).toBeGreaterThan(300 * 1.03);
+  });
+
+  it('preserves channel count for stereo', () => {
+    const l = sine(200, 0.2, 48000);
+    const r = sine(400, 0.2, 48000);
+    const out = obfuscateAudio([l, r], 48000, { seed: 2 });
+    expect(out.channels.length).toBe(2);
+    expect(out.sampleRate).toBe(48000);
   });
 });
 

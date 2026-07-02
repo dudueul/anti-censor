@@ -70,3 +70,53 @@ export function addAudioNoise(x: Float32Array, amplitude = 0.005, seed = 1): Flo
   for (let i = 0; i < x.length; i++) out[i] = x[i]! + (rng() * 2 - 1) * amplitude;
   return out;
 }
+
+/**
+ * Sample-rate conversion (linear interpolation) that preserves real-time
+ * duration and pitch — unlike {@link resampleLinear}, which changes speed. Used
+ * to bring decoded audio to the Opus encoder's 48 kHz.
+ */
+export function convertSampleRate(x: Float32Array, srcRate: number, dstRate: number): Float32Array {
+  if (srcRate === dstRate || x.length === 0) return x;
+  const outLen = Math.max(1, Math.round((x.length * dstRate) / srcRate));
+  const out = new Float32Array(outLen);
+  const step = srcRate / dstRate;
+  for (let i = 0; i < outLen; i++) {
+    const pos = i * step;
+    const i0 = Math.floor(pos);
+    const i1 = Math.min(i0 + 1, x.length - 1);
+    const frac = pos - i0;
+    out[i] = x[i0]! * (1 - frac) + x[i1]! * frac;
+  }
+  return out;
+}
+
+export interface ObfuscateAudioOptions {
+  /** Pitch shift ratio (duration-preserving). Small so it stays inaudible-ish. */
+  pitch?: number;
+  /** White-noise amplitude. */
+  noise?: number;
+  seed?: number;
+  /** Encoder target rate (Opus wants 48 kHz). */
+  targetRate?: number;
+}
+
+/**
+ * Desynchronise audio fingerprints on a multi-channel track: a small
+ * pitch micro-shift (duration-preserving, so A/V stays aligned) plus light
+ * noise, resampled to `targetRate`. Pure; the browser encode/mux is the adapter.
+ */
+export function obfuscateAudio(
+  channels: Float32Array[],
+  srcRate: number,
+  opts: ObfuscateAudioOptions = {},
+): { channels: Float32Array[]; sampleRate: number } {
+  const { pitch = 1.03, noise = 0.004, seed = 1, targetRate = 48000 } = opts;
+  const out = channels.map((ch, i) => {
+    let y = pitchShift(ch, pitch);
+    y = addAudioNoise(y, noise, (seed ^ ((i + 1) * 0x9e3779b1)) >>> 0);
+    y = convertSampleRate(y, srcRate, targetRate);
+    return y;
+  });
+  return { channels: out, sampleRate: targetRate };
+}

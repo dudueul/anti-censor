@@ -83,7 +83,8 @@ audio via pure pitch/tempo DSP cores.
 | adversarial-texture / decoy-watermark | P3 | ✅ implemented + tested (opt-in, honestly weak) |
 | video temporal plan + per-frame processor | P2 | ✅ pure cores implemented + tested |
 | video adapter (WebCodecs decode/encode + WebM mux) | P2 | ✅ implemented + E2E-tested; wired via an offscreen document |
-| audio DSP cores (pitch/tempo/noise) | P2 | ✅ implemented + tested (muxing an audio track = future work) |
+| audio DSP cores (pitch/tempo/noise/sample-rate) | P2 | ✅ implemented + tested |
+| audio decode + obfuscate + Opus re-mux into the video | P2 | ✅ implemented + E2E-tested (audio-only encode path) |
 
 Opt-in stages (seam carve, elastic warp, PRNU) are exposed via the pipeline
 `carve` / `elastic` / `prnu` options and the extension's **"Maximize evasion"**

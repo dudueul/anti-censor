@@ -104,6 +104,36 @@ describe('video adapter in real Chromium', () => {
     expect(res.magic).toEqual([0x1a, 0x45, 0xdf, 0xa3]);
   });
 
+  it('encodes obfuscated audio to a valid, loadable Opus/WebM', async () => {
+    const page = await securePage();
+    const res = await page.evaluate(async () => {
+      const AC = (window as any).AC;
+      const sr = 48000;
+      const secs = 0.5;
+      const n = sr * secs;
+      const ch = new Float32Array(n);
+      for (let i = 0; i < n; i++) ch[i] = Math.sin((2 * Math.PI * 330 * i) / sr) * 0.3;
+      const { channels, sampleRate } = AC.obfuscateAudio([ch], sr, { pitch: 1.03, seed: 1 });
+      const blob: Blob = await AC.encodeAudioOnlyWebm(channels, sampleRate);
+      const magic = Array.from(new Uint8Array(await blob.arrayBuffer()).slice(0, 4));
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('audio');
+      a.src = url;
+      const dur = await new Promise<number>((r) => {
+        a.onloadedmetadata = () => r(a.duration);
+        a.onerror = () => r(-1);
+      });
+      URL.revokeObjectURL(url);
+      return { size: blob.size, type: blob.type, magic, dur };
+    });
+    await page.close();
+    expect(res.size).toBeGreaterThan(0);
+    expect(res.type).toContain('webm');
+    expect(res.magic).toEqual([0x1a, 0x45, 0xdf, 0xa3]);
+    expect(res.dur).toBeGreaterThan(0); // decodes/plays
+  });
+
   it('processVideo produces a playable WebM whose frames are transformed', async () => {
     const page = await securePage();
     const res = await page.evaluate(async (helpers) => {

@@ -56,9 +56,13 @@ suppression** — plus opt-in adversarial-texture and decoy-watermark stages.
 
 ```bash
 npm install
-npm test          # 100+ pure unit tests
+npm test          # ~150 pure unit tests (Node)
+npm run test:e2e  # browser integration tests (drives Chromium via Playwright)
 npm run build     # bundles the extension into dist/
 ```
+
+The E2E tests use a pre-installed Chromium; point `PW_CHROMIUM` at the binary if
+it is not auto-detected (e.g. `PW_CHROMIUM=/path/to/chrome npm run test:e2e`).
 
 Then in Chrome/Chromium: **Extensions → Enable Developer mode → Load unpacked →
 select the `dist/` folder.**

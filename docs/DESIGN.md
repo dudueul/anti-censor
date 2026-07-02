@@ -106,6 +106,13 @@ high-fidelity.
   pixel-lossless.
 - **Pipeline-order test**: full pipeline on `photoLike` ⇒ final aHash/dHash/pHash
   all past threshold and SSIM above floor.
+- **Browser integration** (`test-e2e/`, `npm run test:e2e`): drives the
+  pre-installed Chromium via Playwright to cover the adapter path unit tests
+  can't — real `processBlob` decode → pipeline → re-encode (pHash moves, SSIM
+  holds), output-format/dimension handling, and the File/DataTransfer/
+  `input.files` swap the content script relies on. Separate Vitest config, kept
+  out of the fast unit suite. Still manual-only: full unpacked-extension load,
+  WebCodecs/WebAudio decode-encode, surrogate-model inference.
 
 ## Limitations & ethics
 

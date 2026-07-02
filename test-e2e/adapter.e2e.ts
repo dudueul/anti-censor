@@ -1,12 +1,21 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { chromium, type Browser } from 'playwright';
 import * as esbuild from 'esbuild';
+import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const CHROMIUM =
-  process.env.PW_CHROMIUM || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+
+// Prefer an explicit path, then the pre-provisioned Chromium; otherwise fall
+// back to Playwright's own installed browser (e.g. in CI after `playwright install`).
+function resolveExecutable(): string | undefined {
+  const candidates = [
+    process.env.PW_CHROMIUM,
+    '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  ].filter(Boolean) as string[];
+  return candidates.find((p) => existsSync(p));
+}
 
 let browser: Browser;
 let harnessJs: string;
@@ -21,7 +30,11 @@ beforeAll(async () => {
     target: ['chrome110'],
   });
   harnessJs = built.outputFiles[0]!.text;
-  browser = await chromium.launch({ executablePath: CHROMIUM, args: ['--no-sandbox'] });
+  const executablePath = resolveExecutable();
+  browser = await chromium.launch({
+    ...(executablePath ? { executablePath } : {}),
+    args: ['--no-sandbox'],
+  });
 });
 
 afterAll(async () => {

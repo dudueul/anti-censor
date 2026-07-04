@@ -119,21 +119,25 @@ high-fidelity.
 ## Red-team validation (independent detectors)
 
 `npm run test:redteam` validates the transforms against detector code we did **not**
-write: pixels are decoded by jimp and hashed by `blockhash-core`. Two lessons are
+write: `sharp-phash` (a real DCT perceptual hash — the imagehash-standard family)
+and `blockhash-core`, with pixels decoded independently by sharp/jimp. Lessons
 baked into the harness:
 
 - **Oracles must be validated, not trusted.** jimp's own `.hash()` turned out to
   be near-constant across totally different images (solid black vs white differ by
-  ~1/64), so its small movement under our transform is meaningless — it is
-  excluded as a detector and kept only as an independent decoder. `blockhash-core`
-  *is* discriminative (distinct photos ~24–56/256 apart) and is used as the oracle.
-- **Independent result:** on photographic inputs the default pipeline moves the
-  `blockhash-core` hash 22–54/256 — i.e. a transformed image lands about as far
-  from its original as a *completely different photo* — at SSIM ≥ 0.81, defeating
-  it on 100% of the corpus (match threshold ~10/256). Maximize mode pushes it
-  further. Our *targeted* pHash maximizer, by contrast, is tuned to our own DCT
-  and does not transfer to arbitrary third-party pHash implementations — geometry
-  and recompression are what generalize.
+  ~1/64), so its movement under our transform is meaningless — it is excluded as a
+  detector and kept only as an independent decoder. `sharp-phash` (distinct photos
+  ~13–38/64 apart) and `blockhash-core` (~24–56/256) *are* discriminative and are
+  used as the oracles.
+- **Independent result (default mode, photographic inputs):** `sharp-phash` moves
+  **20–23/64** and `blockhash-core` **22–50/256** — i.e. a transformed image lands
+  *farther from its original than two distinct photos are from each other* — at
+  SSIM ≥ 0.81, defeating both on 100% of the corpus (match thresholds ~10).
+- **Why it transfers here:** our targeted pHash maximizer attacks the standard
+  32×32→DCT→8×8→median structure, which is exactly what `sharp-phash` computes, so
+  it generalizes to that whole family. It would *not* transfer to a differently-
+  structured hash; geometry and recompression are the components that generalize
+  regardless of implementation.
 
 ## Limitations & ethics
 

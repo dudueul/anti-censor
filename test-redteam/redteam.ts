@@ -1,6 +1,8 @@
 import { PNG } from 'pngjs';
 import { Jimp } from 'jimp';
 import { bmvbhash } from 'blockhash-core';
+// @ts-expect-error - no types shipped
+import phash from 'sharp-phash';
 import type { Raster } from '../src/core/types';
 
 /**
@@ -18,8 +20,10 @@ export function encodePng(r: Raster): Buffer {
 }
 
 export interface IndependentHashes {
-  /** jimp perceptual hash, 64-bit binary string. */
+  /** jimp perceptual hash, 64-bit binary string (NOT discriminative; see harness). */
   phash: string;
+  /** sharp-phash: a real DCT perceptual hash, 64-bit binary string. */
+  dct: string;
   /** blockhash-core, 256-bit hex string. */
   block: string;
   /** the PNG-round-tripped raster (jimp-decoded), for independent SSIM. */
@@ -27,10 +31,12 @@ export interface IndependentHashes {
 }
 
 export async function independentHashes(r: Raster): Promise<IndependentHashes> {
-  const img = await Jimp.read(encodePng(r));
+  const png = encodePng(r);
+  const img = await Jimp.read(png);
   const { width, height, data } = img.bitmap;
   return {
     phash: img.hash(2),
+    dct: await phash(png),
     block: bmvbhash({ width, height, data }, 16),
     raster: { width, height, data: new Uint8ClampedArray(data) },
   };

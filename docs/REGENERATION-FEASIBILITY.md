@@ -75,9 +75,12 @@ img2img pass.
    unit-tested `classifyAdapter()` that decides available / software-vs-hardware /
    fp16 / enough-memory. The extension only *offers* regeneration when a suitable
    adapter exists. Cheap, testable now, de-risks everything downstream.
-2. **Runtime spike (manual, GPU machine).** Bundle `onnxruntime-web`, load a small
-   ONNX model, confirm a WebGPU compute pass runs end-to-end in an offscreen
-   document; measure cold-start + per-step latency.
+2. **Runtime spike — ✅ VALIDATED.** `onnxruntime-web` loads in the target
+   Chromium and runs a real compute on the **WebGPU execution provider**
+   (`test-e2e/ort.e2e.ts`: `Add(X,X)` on `[1,2,3,4]` → `[2,4,6,8]`, `ep: webgpu`).
+   Confirmed on SwiftShader here — the same code path runs GPU-accelerated on real
+   hardware; only latency differs. The biggest integration unknown (does the ML
+   runtime + WebGPU work in this browser context) is now closed.
 3. **Model plumbing.** First-run download of weights to **Cache API / OPFS** (too
    big to bundle; Chrome Web Store limits), progress UX, `host_permissions` for the
    model CDN, CSP `wasm-unsafe-eval`.
@@ -107,8 +110,11 @@ img2img pass.
 - **Capability probe E2E** can run in the sandbox (SwiftShader) to confirm the
   gate detects an adapter and correctly flags it as *software* (so the feature
   would be withheld) — that path is exercised here.
-- **Regeneration itself** is validated on a **GPU machine / self-hosted runner**,
-  not in the default CI.
+- **The runtime path is CI-testable** even without a GPU: `onnxruntime-web`
+  executes on the WebGPU EP (SwiftShader) or falls back to WASM, and
+  `test-e2e/ort.e2e.ts` asserts a correct result either way.
+- **Regeneration itself** (a real diffusion model at usable speed) is validated on
+  a **GPU machine / self-hosted runner**, not in the default CI.
 
 ## Sources
 

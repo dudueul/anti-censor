@@ -4,6 +4,7 @@
 export { processBlob, blobToRaster, rasterToBlob, outputName } from '../src/adapters/canvas';
 export { processVideo, extractFrames, encodeFramesToWebm, encodeAudioOnlyWebm } from '../src/adapters/video';
 export { obfuscateAudio } from '../src/core/audio/dsp';
+export { detectWebGpu } from '../src/adapters/webgpu';
 export { transformImage } from '../src/core/pipeline';
 export { stripMetadata } from '../src/core/codec';
 export { pHash } from '../src/core/hash/phash';

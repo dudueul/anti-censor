@@ -81,6 +81,8 @@ audio via pure pitch/tempo DSP cores.
 | pipeline controller + verification gate | P0 | ✅ implemented + tested |
 | browser adapters + MV3 extension + build | P0 | ✅ implemented |
 | adversarial-texture / decoy-watermark | P3 | ✅ implemented + tested (opt-in, honestly weak) |
+| WebGPU capability gate (for regeneration) | P3 | ✅ implemented + tested (unit + real-browser E2E) |
+| diffusion regeneration (SynthID/learned watermarks) | P3 | scoped — see docs/REGENERATION-FEASIBILITY.md (GO-with-caveats; heavy, opt-in, GPU-only) |
 | video temporal plan + per-frame processor | P2 | ✅ pure cores implemented + tested |
 | video adapter (WebCodecs decode/encode + WebM mux) | P2 | ✅ implemented + E2E-tested; wired via an offscreen document |
 | audio DSP cores (pitch/tempo/noise/sample-rate) | P2 | ✅ implemented + tested |

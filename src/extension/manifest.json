@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "anti-censor",
+  "version": "0.1.0",
+  "description": "Apply imperceptible transforms to images so automated content-identification (perceptual hashes, watermarks, C2PA) treats them as new, unidentified media.",
+  "permissions": ["contextMenus", "downloads", "storage", "offscreen"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "anti-censor"
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  }
+}

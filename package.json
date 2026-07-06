@@ -1,0 +1,33 @@
+{
+  "name": "anti-censor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chromium extension that applies imperceptible transforms to images so automated content-identification systems treat them as new, unidentified media.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "test:redteam": "vitest run --config vitest.redteam.config.ts",
+    "coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "build": "node scripts/build.mjs",
+    "build:watch": "node scripts/build.mjs --watch"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.270",
+    "@types/node": "^22.10.0",
+    "@vitest/coverage-v8": "^2.1.8",
+    "blockhash-core": "^0.1.0",
+    "esbuild": "^0.24.0",
+    "jimp": "^1.6.1",
+    "onnxruntime-web": "^1.27.0",
+    "playwright": "^1.61.1",
+    "pngjs": "^7.0.0",
+    "sharp": "^0.35.3",
+    "sharp-phash": "^2.2.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "webm-muxer": "^5.1.4"
+  }
+}

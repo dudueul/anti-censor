@@ -37,6 +37,19 @@ export { rasterToTensor, tensorToRaster } from './diffusion/image-latent';
 export { regenerateImage } from './diffusion/pipeline';
 export type { RegenerateImageDeps } from './diffusion/pipeline';
 
+// Model download/cache manager (pure orchestration; fetch + Cache API = adapter).
+export {
+  validateManifest,
+  totalBytes,
+  aggregateProgress,
+  fnv1a32Hex,
+  cacheKey,
+  planFetches,
+} from './model/manifest';
+export type { ModelManifest, ModelFile, CacheStore, Progress } from './model/manifest';
+export { acquireModel } from './model/acquire';
+export type { AcquireDeps, AcquiredModel } from './model/acquire';
+
 // Video / audio cores (pure; the WebCodecs/WebAudio decode-encode is an adapter).
 export { temporalPlan } from './video/temporal';
 export type { TemporalOptions, PlannedFrame, TemporalPlanResult } from './video/temporal';

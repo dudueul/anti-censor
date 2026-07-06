@@ -7,6 +7,7 @@ import {
 } from '../core/diffusion/pipeline';
 import type { RegenerateOptions } from '../core/diffusion/regenerate';
 import { detectWebGpu, type WebGpuStatus } from './webgpu';
+import type { AcquiredModel } from '../core/model/acquire';
 import type * as Ort from 'onnxruntime-web';
 
 /**
@@ -22,9 +23,10 @@ import type * as Ort from 'onnxruntime-web';
  * but does NOT defeat SynthID or Tree-Ring — see docs/REGENERATION-FEASIBILITY.md.
  */
 export interface RegenerationConfig {
-  vaeEncoderUrl: string;
-  unetUrl: string;
-  vaeDecoderUrl: string;
+  /** ONNX source: a URL, or the raw bytes (e.g. from acquireModel). */
+  vaeEncoder: string | Uint8Array;
+  unet: string | Uint8Array;
+  vaeDecoder: string | Uint8Array;
   /** SD latent scaling factor. */
   latentScale?: number;
   /** ORT WASM asset directory URL. */
@@ -81,11 +83,11 @@ export async function createRegenerator(config: RegenerationConfig): Promise<Reg
   const downscale = config.downscale ?? 8;
   const alphaBar = alphasCumprod(linearBetaSchedule(1000));
 
-  const ep = ['webgpu'] as const;
+  const eps = ['webgpu'];
   const [vaeEnc, unet, vaeDec] = await Promise.all([
-    ort.InferenceSession.create(config.vaeEncoderUrl, { executionProviders: ep as unknown as string[] }),
-    ort.InferenceSession.create(config.unetUrl, { executionProviders: ep as unknown as string[] }),
-    ort.InferenceSession.create(config.vaeDecoderUrl, { executionProviders: ep as unknown as string[] }),
+    ort.InferenceSession.create(config.vaeEncoder as string, { executionProviders: eps }),
+    ort.InferenceSession.create(config.unet as string, { executionProviders: eps }),
+    ort.InferenceSession.create(config.vaeDecoder as string, { executionProviders: eps }),
   ]);
 
   const T = (data: Float32Array, dims: number[]) => new ort.Tensor('float32', data, dims);
@@ -129,4 +131,23 @@ export async function createRegenerator(config: RegenerationConfig): Promise<Reg
   return {
     regenerate: (raster, opts = { strength: 0.2, steps: 2 }) => regenerateImage(raster, opts, deps),
   };
+}
+
+/** Build a regenerator from an already-downloaded/cached model (see acquireModel). */
+export function createRegeneratorFromAcquired(
+  acquired: AcquiredModel,
+  names: { vaeEncoder: string; unet: string; vaeDecoder: string },
+  config: Omit<RegenerationConfig, 'vaeEncoder' | 'unet' | 'vaeDecoder'> = {},
+): Promise<Regenerator> {
+  const get = (n: string): Uint8Array => {
+    const b = acquired.files[n];
+    if (!b) throw new Error(`acquired model missing file: ${n}`);
+    return b;
+  };
+  return createRegenerator({
+    ...config,
+    vaeEncoder: get(names.vaeEncoder),
+    unet: get(names.unet),
+    vaeDecoder: get(names.vaeDecoder),
+  });
 }

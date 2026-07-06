@@ -84,6 +84,7 @@ audio via pure pitch/tempo DSP cores.
 | WebGPU capability gate (for regeneration) | P3 | ✅ implemented + tested (unit + real-browser E2E) |
 | diffusion regeneration — pure core (scheduler, regenerate loop, image↔tensor, orchestration) | P3 | ✅ implemented + unit-tested (16 tests) |
 | diffusion regeneration — ONNX/WebGPU adapter | P3 | ⚠️ scaffolded, GPU-only, not in CI (removes learned pixel watermarks, NOT SynthID/Tree-Ring) |
+| model download/cache manager (manifest, integrity, progress, acquire) | P3 | ✅ orchestration unit-tested (8 tests); Cache-API/fetch glue scaffolded |
 | video temporal plan + per-frame processor | P2 | ✅ pure cores implemented + tested |
 | video adapter (WebCodecs decode/encode + WebM mux) | P2 | ✅ implemented + E2E-tested; wired via an offscreen document |
 | audio DSP cores (pitch/tempo/noise/sample-rate) | P2 | ✅ implemented + tested |

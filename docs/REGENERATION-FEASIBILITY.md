@@ -81,9 +81,13 @@ img2img pass.
    Confirmed on SwiftShader here — the same code path runs GPU-accelerated on real
    hardware; only latency differs. The biggest integration unknown (does the ML
    runtime + WebGPU work in this browser context) is now closed.
-3. **Model plumbing.** First-run download of weights to **Cache API / OPFS** (too
-   big to bundle; Chrome Web Store limits), progress UX, `host_permissions` for the
-   model CDN, CSP `wasm-unsafe-eval`.
+3. **Model plumbing — orchestration ✅ DONE, glue scaffolded.** `src/core/model`
+   (unit-tested): manifest validation (https-only), byte accounting, progress
+   aggregation, an FNV-1a integrity hash, cache-hit/miss fetch planning, and
+   `acquireModel` (cache→fetch→verify→cache→report, injected fetch/store).
+   `src/adapters/model-store.ts` provides the browser glue (Cache-API store +
+   streaming `fetchBytesWithProgress`). Still needs, at integration time:
+   `host_permissions` for the model CDN and CSP `wasm-unsafe-eval`.
 4. **img2img regeneration adapter — pure core ✅ DONE, GPU wiring scaffolded.**
    The diffusion MATH is implemented and fully unit-tested in `src/core/diffusion`
    (noise schedule, strength→timestep mapping, latent noising, LCM denoise

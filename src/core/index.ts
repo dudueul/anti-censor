@@ -23,6 +23,20 @@ export { suppressPrnu } from './transforms/prnu';
 export { adversarialTexture } from './transforms/adversarial';
 export { injectDecoyWatermark, detectDecoy } from './transforms/decoy';
 
+// Diffusion regeneration core (pure math; the ONNX/GPU model is an adapter).
+export {
+  linearBetaSchedule,
+  alphasCumprod,
+  strengthToTimesteps,
+  addNoiseToLatent,
+  lcmDenoiseStep,
+} from './diffusion/scheduler';
+export { regenerateLatent } from './diffusion/regenerate';
+export type { LatentDenoiser, RegenerateOptions } from './diffusion/regenerate';
+export { rasterToTensor, tensorToRaster } from './diffusion/image-latent';
+export { regenerateImage } from './diffusion/pipeline';
+export type { RegenerateImageDeps } from './diffusion/pipeline';
+
 // Video / audio cores (pure; the WebCodecs/WebAudio decode-encode is an adapter).
 export { temporalPlan } from './video/temporal';
 export type { TemporalOptions, PlannedFrame, TemporalPlanResult } from './video/temporal';

@@ -84,9 +84,15 @@ img2img pass.
 3. **Model plumbing.** First-run download of weights to **Cache API / OPFS** (too
    big to bundle; Chrome Web Store limits), progress UX, `host_permissions` for the
    model CDN, CSP `wasm-unsafe-eval`.
-4. **img2img regeneration adapter.** VAE-encode → add noise → 1–2 UNet steps →
-   VAE-decode, at configurable strength; wire as an opt-in `regenerate` stage
-   *before* the existing pipeline.
+4. **img2img regeneration adapter — pure core ✅ DONE, GPU wiring scaffolded.**
+   The diffusion MATH is implemented and fully unit-tested in `src/core/diffusion`
+   (noise schedule, strength→timestep mapping, latent noising, LCM denoise
+   reconstruction, image↔tensor, and the encode→regenerate→decode orchestration
+   with an injected VAE/denoiser — a perfect denoiser provably recovers the
+   image). `src/adapters/regenerate.ts` wires ONNX (VAE encoder / UNet / VAE
+   decoder) sessions to that core behind the WebGPU gate, with **configurable
+   tensor I/O names** (not guessed). The adapter is **GPU-only and not run in CI**
+   (needs the real ~1 GB model); it is validated manually on a GPU machine.
 5. **Validation.** On a GPU machine, measure real removal of Stable
    Signature / StegaStamp (open decoders) and confirm SSIM; document that
    Tree-Ring/SynthID are not reliably removed.

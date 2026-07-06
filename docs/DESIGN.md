@@ -82,7 +82,8 @@ audio via pure pitch/tempo DSP cores.
 | browser adapters + MV3 extension + build | P0 | ✅ implemented |
 | adversarial-texture / decoy-watermark | P3 | ✅ implemented + tested (opt-in, honestly weak) |
 | WebGPU capability gate (for regeneration) | P3 | ✅ implemented + tested (unit + real-browser E2E) |
-| diffusion regeneration (SynthID/learned watermarks) | P3 | scoped — see docs/REGENERATION-FEASIBILITY.md (GO-with-caveats; heavy, opt-in, GPU-only) |
+| diffusion regeneration — pure core (scheduler, regenerate loop, image↔tensor, orchestration) | P3 | ✅ implemented + unit-tested (16 tests) |
+| diffusion regeneration — ONNX/WebGPU adapter | P3 | ⚠️ scaffolded, GPU-only, not in CI (removes learned pixel watermarks, NOT SynthID/Tree-Ring) |
 | video temporal plan + per-frame processor | P2 | ✅ pure cores implemented + tested |
 | video adapter (WebCodecs decode/encode + WebM mux) | P2 | ✅ implemented + E2E-tested; wired via an offscreen document |
 | audio DSP cores (pitch/tempo/noise/sample-rate) | P2 | ✅ implemented + tested |
